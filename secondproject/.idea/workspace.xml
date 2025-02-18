@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4707ed86-f4a7-44a3-a750-1d3887fc990f" name="Changes" comment="" />
+    <list default="true" id="4707ed86-f4a7-44a3-a750-1d3887fc990f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/bin/secondproject.dart" beforeDir="false" afterPath="$PROJECT_DIR$/bin/secondproject.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -12,6 +14,12 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 5
@@ -24,6 +32,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Dart Command Line App.secondproject.dart.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
@@ -31,7 +40,9 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "kotlin-language-version-configured": "true"
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
   <component name="RunManager" selected="Dart Command Line App.secondproject.dart">
