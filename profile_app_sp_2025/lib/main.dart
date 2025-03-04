@@ -1,24 +1,8 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flashcard App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const FlashcardScreen(),
-    );
-  }
-}
+void main() => runApp(const MaterialApp(
+  home: FlashcardScreen(),
+));
 
 class Flashcard {
   final String question;
@@ -28,42 +12,24 @@ class Flashcard {
 }
 
 class FlashcardScreen extends StatelessWidget {
-  const FlashcardScreen({super.key});
+  const FlashcardScreen({Key? key}) : super(key: key);
 
-  static final List<Flashcard> flashcards = [
-    const Flashcard(
-      question: "What is the capital of France?",
-      answer: "Paris",
-    ),
-    const Flashcard(
-      question: "What is 2 + 2?",
-      answer: "4",
-    ),
-    const Flashcard(
-      question: "What is the largest planet in our solar system?",
-      answer: "Jupiter",
-    ),
-    const Flashcard(
-      question: "Who wrote 'Romeo and Juliet'?",
-      answer: "William Shakespeare",
-    ),
+  static const List<Flashcard> flashcards = [
+    Flashcard(question: "What is the capital of France?", answer: "Paris"),
+    Flashcard(question: "What is 2 + 2?", answer: "4"),
+    Flashcard(question: "What is the largest planet?", answer: "Jupiter"),
+    Flashcard(question: "Who wrote 'Romeo and Juliet'?", answer: "Shakespeare"),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flashcards'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Flashcards')),
       body: ListView.builder(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8),
         itemCount: flashcards.length,
         itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: FlashcardWidget(flashcard: flashcards[index]),
-          );
+          return FlashcardWidget(flashcard: flashcards[index]);
         },
       ),
     );
@@ -72,45 +38,30 @@ class FlashcardScreen extends StatelessWidget {
 
 class FlashcardWidget extends StatefulWidget {
   final Flashcard flashcard;
-
-  const FlashcardWidget({
-    super.key,
-    required this.flashcard,
-  });
+  const FlashcardWidget({Key? key, required this.flashcard}) : super(key: key);
 
   @override
   State<FlashcardWidget> createState() => _FlashcardWidgetState();
 }
 
 class _FlashcardWidgetState extends State<FlashcardWidget> {
-  bool _showAnswer = false;
-
-  void _toggleCard() {
-    setState(() {
-      _showAnswer = !_showAnswer;
-    });
-  }
+  bool showAnswer = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _toggleCard,
+      onTap: () => setState(() => showAnswer = !showAnswer),
       child: Card(
         elevation: 4,
-        child: Container(
-          height: 150,
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Text(
-                _showAnswer
-                    ? widget.flashcard.answer
-                    : widget.flashcard.question,
-                key: ValueKey<bool>(_showAnswer),
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              showAnswer ? widget.flashcard.answer : widget.flashcard.question,
+              key: ValueKey(showAnswer),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
         ),
