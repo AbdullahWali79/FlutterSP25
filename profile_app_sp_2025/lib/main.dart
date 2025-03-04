@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 void main() {
-  runApp(const MyApp());
+  runApp(const FlashcardApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FlashcardApp extends StatelessWidget {
+  const FlashcardApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // A lively theme with a custom color scheme and Material 3 enabled
     return MaterialApp(
-      title: 'Flashcard App',
+      title: 'Colorful Flashcards',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
+        textTheme: const TextTheme(
+          headlineSmall: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
       ),
       home: const FlashcardScreen(),
     );
@@ -24,217 +31,123 @@ class MyApp extends StatelessWidget {
 class Flashcard {
   final String question;
   final String answer;
-  final String category;
 
-  const Flashcard(
-      {required this.question,
-        required this.answer,
-        this.category = 'General'});
+  const Flashcard({
+    required this.question,
+    required this.answer,
+  });
 }
 
-class FlashcardScreen extends StatefulWidget {
-  const FlashcardScreen({super.key});
+class FlashcardScreen extends StatelessWidget {
+  const FlashcardScreen({Key? key}) : super(key: key);
 
-  @override
-  State<FlashcardScreen> createState() => _FlashcardScreenState();
-}
-
-class _FlashcardScreenState extends State<FlashcardScreen> {
-  final List<Flashcard> flashcards = const [
-    Flashcard(
+  static final List<Flashcard> flashcards = [
+    const Flashcard(
       question: "What is the capital of France?",
       answer: "Paris",
-      category: "Geography",
     ),
-    Flashcard(
+    const Flashcard(
       question: "What is 2 + 2?",
       answer: "4",
-      category: "Math",
     ),
-    Flashcard(
+    const Flashcard(
       question: "What is the largest planet in our solar system?",
       answer: "Jupiter",
-      category: "Science",
     ),
-    Flashcard(
+    const Flashcard(
       question: "Who wrote 'Romeo and Juliet'?",
       answer: "William Shakespeare",
-      category: "Literature",
     ),
   ];
-
-  int _currentIndex = 0;
-  bool _showAnswer = false;
-
-  void _nextCard() {
-    setState(() {
-      _showAnswer = false;
-      _currentIndex = (_currentIndex + 1) % flashcards.length;
-    });
-  }
-
-  void _previousCard() {
-    setState(() {
-      _showAnswer = false;
-      _currentIndex =
-          (_currentIndex - 1 + flashcards.length) % flashcards.length;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar with a bright color from our theme
       appBar: AppBar(
-        title: const Text('Flashcards'),
+        title: const Text('Colorful Flashcards'),
         centerTitle: true,
-        actions: [
-          TextButton.icon(
-            onPressed: () {
-              setState(() {
-                _currentIndex = 0;
-                _showAnswer = false;
-              });
-            },
-            icon: const Icon(Icons.restart_alt),
-            label: const Text('Reset'),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Card ${_currentIndex + 1} of ${flashcards.length}',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+      body: Container(
+        // A simple gradient background to make the screen more colorful
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFFE0B2), // Light orange tone
+              Color(0xFFFFCC80), // Slightly darker orange tone
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: FlashcardWidget(
-                flashcard: flashcards[_currentIndex],
-                showAnswer: _showAnswer,
-                onTap: () {
-                  setState(() {
-                    _showAnswer = !_showAnswer;
-                  });
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton.filled(
-                  onPressed: _previousCard,
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                IconButton.filled(
-                  onPressed: () {
-                    setState(() {
-                      _showAnswer = !_showAnswer;
-                    });
-                  },
-                  icon: Icon(
-                      _showAnswer ? Icons.visibility_off : Icons.visibility),
-                ),
-                IconButton.filled(
-                  onPressed: _nextCard,
-                  icon: const Icon(Icons.arrow_forward),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+          itemCount: flashcards.length,
+          itemBuilder: (context, index) {
+            return FlashcardWidget(flashcard: flashcards[index]);
+          },
+        ),
       ),
     );
   }
 }
 
-class FlashcardWidget extends StatelessWidget {
+class FlashcardWidget extends StatefulWidget {
   final Flashcard flashcard;
-  final bool showAnswer;
-  final VoidCallback onTap;
 
   const FlashcardWidget({
-    super.key,
+    Key? key,
     required this.flashcard,
-    required this.showAnswer,
-    required this.onTap,
-  });
+  }) : super(key: key);
+
+  @override
+  State<FlashcardWidget> createState() => _FlashcardWidgetState();
+}
+
+class _FlashcardWidgetState extends State<FlashcardWidget> {
+  bool _showAnswer = false;
+
+  void _toggleCard() {
+    setState(() {
+      _showAnswer = !_showAnswer;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Different background colors for question side vs. answer side
+    final cardColor = _showAnswer ? Colors.tealAccent[100] : Colors.pinkAccent[100];
+
     return GestureDetector(
-      onTap: onTap,
-      child: TweenAnimationBuilder(
-        tween: Tween<double>(
-          begin: 0,
-          end: showAnswer ? 180 : 0,
+      onTap: _toggleCard,
+      child: Card(
+        color: cardColor,
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
         ),
-        duration: const Duration(milliseconds: 300),
-        builder: (context, double value, child) {
-          bool showFront = value < 90;
-          return Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001)
-              ..rotateY(value * math.pi / 180),
-            alignment: Alignment.center,
-            child: Card(
-              elevation: 4,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(context).colorScheme.secondaryContainer,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Transform(
-                      transform: Matrix4.identity()
-                        ..rotateY(showFront ? 0 : math.pi),
-                      alignment: Alignment.center,
-                      child: Column(
-                        children: [
-                          Text(
-                            showFront ? flashcard.question : flashcard.answer,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Chip(
-                            label: Text(
-                              flashcard.category,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            showFront
-                                ? 'Tap to reveal answer'
-                                : 'Tap to hide answer',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        child: SizedBox(
+          height: 150,
+          child: Center(
+            // AnimatedSwitcher to smoothly animate between question and answer
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                // You can try different animations: FadeTransition, ScaleTransition, etc.
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Text(
+                _showAnswer
+                    ? widget.flashcard.answer
+                    : widget.flashcard.question,
+                key: ValueKey<bool>(_showAnswer),
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
