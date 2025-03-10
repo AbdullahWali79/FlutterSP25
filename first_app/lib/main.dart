@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'services/auth_service.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/signup_screen.dart';
+import 'screens/home/home_screen.dart';
 
 void main() {
-  runApp(First());
+  runApp(MyApp());
 }
 
-class First extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.pink,
+    return ChangeNotifierProvider(
+      create: (_) => AuthService(),
+      child: MaterialApp(
+        title: 'Task Manager',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
         ),
-        body: Center(
-          child: Text(
-            "Abdullah",
-            style: TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => LoginScreen(),
+          '/signup': (context) => SignUpScreen(),
+          '/home': (context) => HomeScreen(),
+        },
       ),
     );
   }
