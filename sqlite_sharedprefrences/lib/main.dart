@@ -15,13 +15,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isDarkMode = false; // Boolean flag to track theme mode
-
   @override
   void initState() {
     super.initState();
     _loadThemePreference(); // Load the saved theme preference when app starts
   }
-
   // Load theme preference using SharedPreferences
   void _loadThemePreference() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -29,7 +27,6 @@ class _MyAppState extends State<MyApp> {
       _isDarkMode = prefs.getBool('isDarkMode') ?? false; // Fetch saved preference or default to false
     });
   }
-
   // Toggle theme and save preference
   void _toggleTheme() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -38,7 +35,6 @@ class _MyAppState extends State<MyApp> {
       prefs.setBool('isDarkMode', _isDarkMode); // Save the new preference
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
