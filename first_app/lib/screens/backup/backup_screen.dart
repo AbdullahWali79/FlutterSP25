@@ -6,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class BackupScreen extends StatefulWidget {
+  const BackupScreen({super.key});
+
   @override
   _BackupScreenState createState() => _BackupScreenState();
 }
@@ -24,7 +26,7 @@ class _BackupScreenState extends State<BackupScreen> {
       setState(() => _lastBackupPath = filePath);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tasks exported to PDF successfully')),
+        const SnackBar(content: Text('Tasks exported to PDF successfully')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -39,7 +41,7 @@ class _BackupScreenState extends State<BackupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Backup Tasks'),
+        title: const Text('Backup Tasks'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,7 +58,7 @@ class _BackupScreenState extends State<BackupScreen> {
                       'Export Tasks',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'Export your tasks to PDF format for backup or sharing.',
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -65,18 +67,18 @@ class _BackupScreenState extends State<BackupScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _exportToPDF,
-              icon: Icon(Icons.picture_as_pdf),
-              label: Text('Export to PDF'),
+              icon: const Icon(Icons.picture_as_pdf),
+              label: const Text('Export to PDF'),
             ),
             if (_isLoading) ...[
-              SizedBox(height: 24),
-              Center(child: CircularProgressIndicator()),
+              const SizedBox(height: 24),
+              const Center(child: CircularProgressIndicator()),
             ],
             if (_lastBackupPath != null) ...[
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -87,7 +89,7 @@ class _BackupScreenState extends State<BackupScreen> {
                         'Last Backup',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Location: $_lastBackupPath',
                         style: Theme.of(context).textTheme.bodyMedium,

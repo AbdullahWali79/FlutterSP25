@@ -5,6 +5,8 @@ import '../../services/auth_service.dart';
 import '../../services/task_service.dart';
 
 class AddTaskScreen extends StatefulWidget {
+  const AddTaskScreen({super.key});
+
   @override
   _AddTaskScreenState createState() => _AddTaskScreenState();
 }

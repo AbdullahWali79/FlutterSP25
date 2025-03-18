@@ -1,48 +1,36 @@
 import 'package:flutter/material.dart';
 
-enum TaskStatus {
-  pending,
-  inProgress,
-  completed,
-}
+enum TaskStatus { pending, completed }
 
-enum RecurrenceType {
-  daily,
-  weekly,
-  monthly,
-  custom,
-  none,
-}
+enum RecurrenceType { none, daily, weekly, monthly, custom }
 
 class Task {
   final String id;
   final String title;
-  final String description;
+  final String? description;
   final DateTime createdAt;
-  final DateTime dueDate;
+  final DateTime? dueDate;
   final TaskStatus status;
   final RecurrenceType recurrenceType;
-  final List<String> subtasks;
-  final double progress;
-  final String userId;
   final List<String> selectedDays;
   final TimeOfDay? reminderTime;
   final List<DateTime>? customDates;
+  final int progress;
+  final List<String>? subtasks;
 
   Task({
     required this.id,
     required this.title,
-    required this.description,
+    this.description,
     required this.createdAt,
-    required this.dueDate,
+    this.dueDate,
     this.status = TaskStatus.pending,
     this.recurrenceType = RecurrenceType.none,
-    this.subtasks = const [],
-    this.progress = 0.0,
-    required this.userId,
     this.selectedDays = const [],
     this.reminderTime,
     this.customDates,
+    this.progress = 0,
+    this.subtasks,
   });
 
   Map<String, dynamic> toMap() {
@@ -51,18 +39,17 @@ class Task {
       'title': title,
       'description': description,
       'createdAt': createdAt.toIso8601String(),
-      'dueDate': dueDate.toIso8601String(),
+      'dueDate': dueDate?.toIso8601String(),
       'status': status.toString(),
       'recurrenceType': recurrenceType.toString(),
-      'subtasks': subtasks,
-      'progress': progress,
-      'userId': userId,
-      'selectedDays': selectedDays,
+      'selectedDays': selectedDays.join(','),
       'reminderTime': reminderTime != null
           ? '${reminderTime!.hour}:${reminderTime!.minute}'
           : null,
       'customDates':
-          customDates?.map((date) => date.toIso8601String()).toList(),
+          customDates?.map((date) => date.toIso8601String()).join(','),
+      'progress': progress,
+      'subtasks': subtasks?.join(','),
     };
   }
 
@@ -72,28 +59,28 @@ class Task {
       title: map['title'],
       description: map['description'],
       createdAt: DateTime.parse(map['createdAt']),
-      dueDate: DateTime.parse(map['dueDate']),
+      dueDate: map['dueDate'] != null ? DateTime.parse(map['dueDate']) : null,
       status: TaskStatus.values.firstWhere(
         (e) => e.toString() == map['status'],
+        orElse: () => TaskStatus.pending,
       ),
       recurrenceType: RecurrenceType.values.firstWhere(
         (e) => e.toString() == map['recurrenceType'],
+        orElse: () => RecurrenceType.none,
       ),
-      subtasks: List<String>.from(map['subtasks']),
-      progress: map['progress'],
-      userId: map['userId'],
-      selectedDays: List<String>.from(map['selectedDays']),
+      selectedDays: map['selectedDays']?.split(',') ?? [],
       reminderTime: map['reminderTime'] != null
           ? TimeOfDay(
               hour: int.parse(map['reminderTime'].split(':')[0]),
               minute: int.parse(map['reminderTime'].split(':')[1]),
             )
           : null,
-      customDates: map['customDates'] != null
-          ? (map['customDates'] as List)
-              .map((date) => DateTime.parse(date))
-              .toList()
-          : null,
+      customDates: map['customDates']
+          ?.split(',')
+          .map((date) => DateTime.parse(date))
+          .toList(),
+      progress: map['progress'] ?? 0,
+      subtasks: map['subtasks']?.split(','),
     );
   }
 
@@ -105,12 +92,11 @@ class Task {
     DateTime? dueDate,
     TaskStatus? status,
     RecurrenceType? recurrenceType,
-    List<String>? subtasks,
-    double? progress,
-    String? userId,
     List<String>? selectedDays,
     TimeOfDay? reminderTime,
     List<DateTime>? customDates,
+    int? progress,
+    List<String>? subtasks,
   }) {
     return Task(
       id: id ?? this.id,
@@ -120,12 +106,11 @@ class Task {
       dueDate: dueDate ?? this.dueDate,
       status: status ?? this.status,
       recurrenceType: recurrenceType ?? this.recurrenceType,
-      subtasks: subtasks ?? this.subtasks,
-      progress: progress ?? this.progress,
-      userId: userId ?? this.userId,
       selectedDays: selectedDays ?? this.selectedDays,
       reminderTime: reminderTime ?? this.reminderTime,
       customDates: customDates ?? this.customDates,
+      progress: progress ?? this.progress,
+      subtasks: subtasks ?? this.subtasks,
     );
   }
 }
