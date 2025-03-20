@@ -7,7 +7,7 @@ class SettingsProvider extends ChangeNotifier {
   int _tableRangeStart = 1;
   int _tableRangeEnd = 20;
   double _fontSize = 20;
-  String _fontFamily = 'Quicksand';
+  String _fontFamily = 'Open Sans';
   Color _primaryColor = Colors.blue;
   List<int> _selectedTables = List.generate(20, (index) => index + 1);
 
@@ -41,7 +41,7 @@ class SettingsProvider extends ChangeNotifier {
     _tableRangeStart = _prefs.getInt('tableRangeStart') ?? 1;
     _tableRangeEnd = _prefs.getInt('tableRangeEnd') ?? 20;
     _fontSize = _prefs.getDouble('fontSize') ?? 20;
-    _fontFamily = _prefs.getString('fontFamily') ?? 'Quicksand';
+    _fontFamily = _prefs.getString('fontFamily') ?? 'Open Sans';
     _primaryColor = Color(_prefs.getInt('primaryColor') ?? Colors.blue.value);
     _selectedTables =
         _prefs.getStringList('selectedTables')?.map(int.parse).toList() ??

@@ -116,8 +116,8 @@ class SettingsScreen extends StatelessWidget {
                       'Quicksand',
                       'Roboto',
                       'Lato',
-                      'OpenSans',
-                      'ComicNeue',
+                      'Open Sans',
+                      'Comic Neue',
                     ]
                         .map((font) => DropdownMenuItem(
                               value: font,
