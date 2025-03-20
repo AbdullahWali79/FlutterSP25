@@ -1,5 +1,5 @@
 name: tga_app_sqlite
-description: "A new Flutter project."
+description: "Multiplication Mastery – Table Generator & Quiz App"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -30,13 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.2
   sqflite: ^2.3.0
   path: ^1.8.3
   provider: ^6.1.1
-  google_fonts: ^6.1.0
-  audioplayers: ^5.2.1
   shared_preferences: ^2.2.2
-  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
 
 dev_dependencies:
   flutter_test:

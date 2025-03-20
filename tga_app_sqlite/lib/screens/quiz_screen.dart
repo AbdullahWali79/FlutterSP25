@@ -21,6 +21,7 @@ class _QuizScreenState extends State<QuizScreen> {
   late int correctAnswer;
   bool isMultipleChoice = true;
   final Random random = Random();
+  bool showFeedback = false;
 
   @override
   void initState() {
@@ -69,6 +70,7 @@ class _QuizScreenState extends State<QuizScreen> {
       isMultipleChoice = questions[currentQuestion]['isMultipleChoice'];
       correctAnswer = questions[currentQuestion]['correctAnswer'];
       selectedAnswer = null;
+      showFeedback = false;
     }
   }
 
@@ -77,11 +79,12 @@ class _QuizScreenState extends State<QuizScreen> {
 
     setState(() {
       selectedAnswer = answer;
+      showFeedback = true;
       if (answer == correctAnswer) {
         score++;
       }
 
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(seconds: 2), () {
         setState(() {
           if (currentQuestion < totalQuestions - 1) {
             currentQuestion++;
@@ -103,6 +106,88 @@ class _QuizScreenState extends State<QuizScreen> {
       'quiz_type': 'Mixed',
       'date_taken': DateTime.now().toIso8601String(),
     });
+  }
+
+  Widget _buildResultScreen(SettingsProvider settings) {
+    final percentage = (score / totalQuestions) * 100;
+    final Color resultColor = percentage >= 70
+        ? Colors.green
+        : percentage >= 50
+            ? Colors.orange
+            : Colors.red;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Quiz Result'),
+        backgroundColor: settings.primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              percentage >= 70
+                  ? Icons.star
+                  : percentage >= 50
+                      ? Icons.star_half
+                      : Icons.star_border,
+              size: 100,
+              color: resultColor,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Your Score',
+              style: TextStyle(
+                fontSize: settings.fontSize * 1.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '$score out of $totalQuestions',
+              style: TextStyle(
+                fontSize: settings.fontSize * 2,
+                fontWeight: FontWeight.bold,
+                color: resultColor,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '${percentage.round()}%',
+              style: TextStyle(
+                fontSize: settings.fontSize * 1.2,
+                color: resultColor,
+              ),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  currentQuestion = 0;
+                  score = 0;
+                  showResult = false;
+                  questions = _generateQuestions();
+                  _setCurrentQuestion();
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: settings.primaryColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              ),
+              child: Text(
+                'Try Again',
+                style: TextStyle(
+                  fontSize: settings.fontSize,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -162,6 +247,27 @@ class _QuizScreenState extends State<QuizScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            if (showFeedback) ...[
+              const SizedBox(height: 20),
+              Text(
+                selectedAnswer == correctAnswer ? 'Correct! 👍' : 'Wrong! 👎',
+                style: TextStyle(
+                  fontSize: settings.fontSize,
+                  color: selectedAnswer == correctAnswer
+                      ? Colors.green
+                      : Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '$num1 × $num2 = $correctAnswer',
+                style: TextStyle(
+                  fontSize: settings.fontSize,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
             const SizedBox(height: 30),
             if (isMultipleChoice)
               ..._buildMultipleChoiceOptions(
@@ -181,9 +287,16 @@ class _QuizScreenState extends State<QuizScreen> {
       final bool isSelected = selectedAnswer == option;
       final bool isCorrect = option == correctAnswer;
       Color? buttonColor;
+      Color? textColor;
 
-      if (isSelected) {
-        buttonColor = isCorrect ? Colors.green : Colors.red;
+      if (showFeedback) {
+        if (option == correctAnswer) {
+          buttonColor = Colors.green;
+          textColor = Colors.white;
+        } else if (isSelected) {
+          buttonColor = Colors.red;
+          textColor = Colors.white;
+        }
       }
 
       return Padding(
@@ -196,7 +309,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 selectedAnswer == null ? () => _checkAnswer(option) : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: buttonColor,
-              foregroundColor: buttonColor != null ? Colors.white : null,
+              foregroundColor: textColor,
             ),
             child: Text(
               option.toString(),
@@ -228,6 +341,12 @@ class _QuizScreenState extends State<QuizScreen> {
                 onPressed: selectedAnswer == null
                     ? () => _checkAnswer(isCorrectAnswer ? correctAnswer : -1)
                     : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: showFeedback
+                      ? (isCorrectAnswer ? Colors.green : Colors.red)
+                      : null,
+                  foregroundColor: showFeedback ? Colors.white : null,
+                ),
                 child: Text(
                   'True',
                   style: TextStyle(fontSize: settings.fontSize),
@@ -240,6 +359,12 @@ class _QuizScreenState extends State<QuizScreen> {
                 onPressed: selectedAnswer == null
                     ? () => _checkAnswer(isCorrectAnswer ? -1 : correctAnswer)
                     : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: showFeedback
+                      ? (!isCorrectAnswer ? Colors.green : Colors.red)
+                      : null,
+                  foregroundColor: showFeedback ? Colors.white : null,
+                ),
                 child: Text(
                   'False',
                   style: TextStyle(fontSize: settings.fontSize),
@@ -249,53 +374,6 @@ class _QuizScreenState extends State<QuizScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildResultScreen(SettingsProvider settings) {
-    final percentage = (score / totalQuestions) * 100;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz Results'),
-        backgroundColor: settings.primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Quiz Complete!',
-              style: TextStyle(
-                fontSize: settings.fontSize * 1.2,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Your Score: $score out of $totalQuestions',
-              style: TextStyle(fontSize: settings.fontSize),
-            ),
-            Text(
-              '${percentage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: settings.fontSize * 1.8,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Return to Home',
-                style: TextStyle(fontSize: settings.fontSize),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -2,20 +2,68 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class ThemeColors {
+  final Color primary;
+  final Color secondary;
+  final List<Color> gradient;
+
+  const ThemeColors({
+    required this.primary,
+    required this.secondary,
+    required this.gradient,
+  });
+}
+
 class SettingsProvider extends ChangeNotifier {
   late SharedPreferences _prefs;
   int _tableRangeStart = 1;
   int _tableRangeEnd = 20;
   double _fontSize = 20;
   String _fontFamily = 'Open Sans';
-  Color _primaryColor = Colors.blue;
+  int _selectedThemeIndex = 0;
   List<int> _selectedTables = List.generate(20, (index) => index + 1);
+
+  final List<ThemeColors> themeOptions = [
+    ThemeColors(
+      primary: Colors.blue,
+      secondary: Colors.lightBlue,
+      gradient: [Colors.blue.shade300, Colors.blue.shade700],
+    ),
+    ThemeColors(
+      primary: Colors.purple,
+      secondary: Colors.purpleAccent,
+      gradient: [Colors.purple.shade300, Colors.purple.shade700],
+    ),
+    ThemeColors(
+      primary: Colors.pink,
+      secondary: Colors.pinkAccent,
+      gradient: [Colors.pink.shade300, Colors.pink.shade700],
+    ),
+    ThemeColors(
+      primary: Colors.green,
+      secondary: Colors.lightGreen,
+      gradient: [Colors.green.shade300, Colors.green.shade700],
+    ),
+    ThemeColors(
+      primary: Colors.orange,
+      secondary: Colors.deepOrange,
+      gradient: [Colors.orange.shade300, Colors.orange.shade700],
+    ),
+    ThemeColors(
+      primary: Colors.teal,
+      secondary: Colors.tealAccent,
+      gradient: [Colors.teal.shade300, Colors.teal.shade700],
+    ),
+  ];
 
   int get tableRangeStart => _tableRangeStart;
   int get tableRangeEnd => _tableRangeEnd;
   double get fontSize => _fontSize;
   String get fontFamily => _fontFamily;
-  Color get primaryColor => _primaryColor;
+  Color get primaryColor => themeOptions[_selectedThemeIndex].primary;
+  Color get secondaryColor => themeOptions[_selectedThemeIndex].secondary;
+  List<Color> get gradientColors => themeOptions[_selectedThemeIndex].gradient;
+  int get selectedThemeIndex => _selectedThemeIndex;
   List<int> get selectedTables => _selectedTables;
 
   TextTheme get textTheme {
@@ -42,7 +90,7 @@ class SettingsProvider extends ChangeNotifier {
     _tableRangeEnd = _prefs.getInt('tableRangeEnd') ?? 20;
     _fontSize = _prefs.getDouble('fontSize') ?? 20;
     _fontFamily = _prefs.getString('fontFamily') ?? 'Open Sans';
-    _primaryColor = Color(_prefs.getInt('primaryColor') ?? Colors.blue.value);
+    _selectedThemeIndex = _prefs.getInt('selectedThemeIndex') ?? 0;
     _selectedTables =
         _prefs.getStringList('selectedTables')?.map(int.parse).toList() ??
             List.generate(20, (index) => index + 1);
@@ -73,9 +121,9 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePrimaryColor(Color value) async {
-    _primaryColor = value;
-    await _prefs.setInt('primaryColor', value.value);
+  Future<void> updateTheme(int index) async {
+    _selectedThemeIndex = index;
+    await _prefs.setInt('selectedThemeIndex', index);
     notifyListeners();
   }
 
