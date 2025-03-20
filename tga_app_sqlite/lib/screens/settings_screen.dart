@@ -6,6 +6,39 @@ import 'package:google_fonts/google_fonts.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  String _getDifficultyDescription(QuizDifficulty difficulty) {
+    switch (difficulty) {
+      case QuizDifficulty.easy:
+        return '5 questions, 10 seconds per question';
+      case QuizDifficulty.medium:
+        return '10 questions, 7 seconds per question';
+      case QuizDifficulty.hard:
+        return '15 questions, 5 seconds per question, no hints';
+    }
+  }
+
+  String _getModeDescription(QuizMode mode) {
+    switch (mode) {
+      case QuizMode.practice:
+        return 'No timer, hints available, detailed explanations';
+      case QuizMode.timed:
+        return 'Timer enabled, earn achievements';
+      case QuizMode.challenge:
+        return 'Harder questions, no hints, compete for high scores';
+    }
+  }
+
+  String _getQuizFormatDescription(QuizFormat format) {
+    switch (format) {
+      case QuizFormat.multipleChoice:
+        return 'All questions will be multiple choice with 4 options';
+      case QuizFormat.trueFalse:
+        return 'All questions will be true/false format';
+      case QuizFormat.mixed:
+        return 'Questions will be a mix of multiple choice and true/false';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
@@ -198,6 +231,196 @@ class SettingsScreen extends StatelessWidget {
                 }),
               ),
             ),
+            const SizedBox(height: 16),
+            _buildAnimatedCard(
+              'Quiz Timer Settings',
+              Icon(Icons.timer, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Enable Timer for Quiz'),
+                      Switch(
+                        value: settings.isQuizTimerEnabled,
+                        onChanged: (value) {
+                          context
+                              .read<SettingsProvider>()
+                              .updateQuizTimerEnabled(value);
+                        },
+                        activeColor: settings.primaryColor,
+                      ),
+                    ],
+                  ),
+                  if (settings.isQuizTimerEnabled) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Timer Duration:'),
+                        DropdownButton<int>(
+                          value: settings.quizTimerDuration,
+                          items: [5, 10]
+                              .map((seconds) => DropdownMenuItem(
+                                    value: seconds,
+                                    child: Text('$seconds seconds'),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              context
+                                  .read<SettingsProvider>()
+                                  .updateQuizTimerDuration(value);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildAnimatedCard(
+              'Quiz Mode',
+              Icon(Icons.gamepad_outlined, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...QuizMode.values.map((mode) => RadioListTile<QuizMode>(
+                        title:
+                            Text(mode.toString().split('.').last.toUpperCase()),
+                        subtitle: Text(_getModeDescription(mode)),
+                        value: mode,
+                        groupValue: settings.quizMode,
+                        onChanged: (value) {
+                          if (value != null) {
+                            context
+                                .read<SettingsProvider>()
+                                .updateQuizMode(value);
+                          }
+                        },
+                      )),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildAnimatedCard(
+              'Difficulty Level',
+              Icon(Icons.trending_up, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...QuizDifficulty.values
+                      .map((difficulty) => RadioListTile<QuizDifficulty>(
+                            title: Text(difficulty
+                                .toString()
+                                .split('.')
+                                .last
+                                .toUpperCase()),
+                            subtitle:
+                                Text(_getDifficultyDescription(difficulty)),
+                            value: difficulty,
+                            groupValue: settings.quizDifficulty,
+                            onChanged: (value) {
+                              if (value != null) {
+                                context
+                                    .read<SettingsProvider>()
+                                    .updateQuizDifficulty(value);
+                              }
+                            },
+                          )),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildAnimatedCard(
+              'Quiz Format',
+              Icon(Icons.format_list_bulleted, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...QuizFormat.values
+                      .map((format) => RadioListTile<QuizFormat>(
+                            title: Text(format
+                                .toString()
+                                .split('.')
+                                .last
+                                .replaceAll(RegExp(r'(?<!^)(?=[A-Z])'), ' ')
+                                .toUpperCase()),
+                            subtitle: Text(_getQuizFormatDescription(format)),
+                            value: format,
+                            groupValue: settings.quizFormat,
+                            onChanged: (value) {
+                              if (value != null) {
+                                context
+                                    .read<SettingsProvider>()
+                                    .updateQuizFormat(value);
+                              }
+                            },
+                          )),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildAnimatedCard(
+              'Achievements',
+              Icon(Icons.emoji_events_outlined, size: 28),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...settings.achievements.map((achievement) => ListTile(
+                        leading: Icon(
+                          achievement.icon,
+                          color: settings.unlockedAchievements
+                                  .contains(achievement.id)
+                              ? Colors.amber
+                              : Colors.grey,
+                        ),
+                        title: Text(achievement.title),
+                        subtitle: Text(achievement.description),
+                        trailing: settings.unlockedAchievements
+                                .contains(achievement.id)
+                            ? const Icon(Icons.check_circle,
+                                color: Colors.green)
+                            : null,
+                      )),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (settings.highScore > 0 || settings.longestStreak > 0)
+              _buildAnimatedCard(
+                'Statistics',
+                Icon(Icons.analytics_outlined, size: 28),
+                Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.stars),
+                      title: const Text('High Score'),
+                      trailing: Text(
+                        '${settings.highScore}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.local_fire_department),
+                      title: const Text('Longest Streak'),
+                      trailing: Text(
+                        '${settings.longestStreak}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

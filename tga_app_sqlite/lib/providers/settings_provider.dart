@@ -2,6 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+enum QuizDifficulty { easy, medium, hard }
+
+enum QuizMode { practice, timed, challenge }
+
+enum QuizFormat { multipleChoice, trueFalse, mixed }
+
+class Achievement {
+  final String title;
+  final String description;
+  final int requiredScore;
+  final IconData icon;
+  final String id;
+
+  const Achievement({
+    required this.title,
+    required this.description,
+    required this.requiredScore,
+    required this.icon,
+    required this.id,
+  });
+}
+
 class ThemeColors {
   final Color primary;
   final Color secondary;
@@ -22,6 +44,68 @@ class SettingsProvider extends ChangeNotifier {
   String _fontFamily = 'Open Sans';
   int _selectedThemeIndex = 0;
   List<int> _selectedTables = List.generate(20, (index) => index + 1);
+  bool _isQuizTimerEnabled = false;
+  int _quizTimerDuration = 5;
+  QuizDifficulty _quizDifficulty = QuizDifficulty.medium;
+  QuizMode _quizMode = QuizMode.timed;
+  Set<String> _unlockedAchievements = {};
+  int _hintsRemaining = 3;
+  int _highScore = 0;
+  int _longestStreak = 0;
+  QuizFormat _quizFormat = QuizFormat.mixed;
+
+  final List<Achievement> achievements = [
+    Achievement(
+      id: 'perfect_score',
+      title: 'Perfect Score',
+      description: 'Get all questions correct in a quiz',
+      requiredScore: 10,
+      icon: Icons.star,
+    ),
+    Achievement(
+      id: 'speed_master',
+      title: 'Speed Master',
+      description:
+          'Complete a timed quiz with less than 3 seconds per question average',
+      requiredScore: 8,
+      icon: Icons.speed,
+    ),
+    Achievement(
+      id: 'streak_master',
+      title: 'Streak Master',
+      description: 'Achieve a streak of 5 correct answers',
+      requiredScore: 5,
+      icon: Icons.local_fire_department,
+    ),
+    Achievement(
+      id: 'practice_makes_perfect',
+      title: 'Practice Makes Perfect',
+      description: 'Complete 5 practice mode quizzes',
+      requiredScore: 5,
+      icon: Icons.school,
+    ),
+  ];
+
+  final Map<QuizDifficulty, Map<String, dynamic>> difficultySettings = {
+    QuizDifficulty.easy: {
+      'timer': 10,
+      'questions': 5,
+      'multipleChoice': true,
+      'hintsAllowed': true,
+    },
+    QuizDifficulty.medium: {
+      'timer': 7,
+      'questions': 10,
+      'multipleChoice': true,
+      'hintsAllowed': true,
+    },
+    QuizDifficulty.hard: {
+      'timer': 5,
+      'questions': 15,
+      'multipleChoice': false,
+      'hintsAllowed': false,
+    },
+  };
 
   final List<ThemeColors> themeOptions = [
     ThemeColors(
@@ -65,6 +149,15 @@ class SettingsProvider extends ChangeNotifier {
   List<Color> get gradientColors => themeOptions[_selectedThemeIndex].gradient;
   int get selectedThemeIndex => _selectedThemeIndex;
   List<int> get selectedTables => _selectedTables;
+  bool get isQuizTimerEnabled => _isQuizTimerEnabled;
+  int get quizTimerDuration => _quizTimerDuration;
+  QuizDifficulty get quizDifficulty => _quizDifficulty;
+  QuizMode get quizMode => _quizMode;
+  Set<String> get unlockedAchievements => _unlockedAchievements;
+  int get hintsRemaining => _hintsRemaining;
+  int get highScore => _highScore;
+  int get longestStreak => _longestStreak;
+  QuizFormat get quizFormat => _quizFormat;
 
   TextTheme get textTheme {
     final baseStyle = GoogleFonts.getFont(
@@ -94,6 +187,17 @@ class SettingsProvider extends ChangeNotifier {
     _selectedTables =
         _prefs.getStringList('selectedTables')?.map(int.parse).toList() ??
             List.generate(20, (index) => index + 1);
+    _isQuizTimerEnabled = _prefs.getBool('isQuizTimerEnabled') ?? false;
+    _quizTimerDuration = _prefs.getInt('quizTimerDuration') ?? 5;
+    _quizDifficulty =
+        QuizDifficulty.values[_prefs.getInt('quizDifficulty') ?? 1];
+    _quizMode = QuizMode.values[_prefs.getInt('quizMode') ?? 1];
+    _unlockedAchievements =
+        _prefs.getStringList('unlockedAchievements')?.toSet() ?? {};
+    _hintsRemaining = _prefs.getInt('hintsRemaining') ?? 3;
+    _highScore = _prefs.getInt('highScore') ?? 0;
+    _longestStreak = _prefs.getInt('longestStreak') ?? 0;
+    _quizFormat = QuizFormat.values[_prefs.getInt('quizFormat') ?? 2];
     notifyListeners();
   }
 
@@ -131,6 +235,75 @@ class SettingsProvider extends ChangeNotifier {
     _selectedTables = value;
     await _prefs.setStringList(
         'selectedTables', value.map((e) => e.toString()).toList());
+    notifyListeners();
+  }
+
+  Future<void> updateQuizTimerEnabled(bool value) async {
+    _isQuizTimerEnabled = value;
+    await _prefs.setBool('isQuizTimerEnabled', value);
+    notifyListeners();
+  }
+
+  Future<void> updateQuizTimerDuration(int seconds) async {
+    _quizTimerDuration = seconds;
+    await _prefs.setInt('quizTimerDuration', seconds);
+    notifyListeners();
+  }
+
+  Future<void> updateQuizDifficulty(QuizDifficulty difficulty) async {
+    _quizDifficulty = difficulty;
+    await _prefs.setInt('quizDifficulty', difficulty.index);
+    _quizTimerDuration = difficultySettings[difficulty]!['timer'];
+    await _prefs.setInt('quizTimerDuration', _quizTimerDuration);
+    notifyListeners();
+  }
+
+  Future<void> updateQuizMode(QuizMode mode) async {
+    _quizMode = mode;
+    await _prefs.setInt('quizMode', mode.index);
+    notifyListeners();
+  }
+
+  Future<void> updateQuizFormat(QuizFormat format) async {
+    _quizFormat = format;
+    await _prefs.setInt('quizFormat', format.index);
+    notifyListeners();
+  }
+
+  Future<void> unlockAchievement(String achievementId) async {
+    if (!_unlockedAchievements.contains(achievementId)) {
+      _unlockedAchievements.add(achievementId);
+      await _prefs.setStringList(
+          'unlockedAchievements', _unlockedAchievements.toList());
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateHintsRemaining(int hints) async {
+    _hintsRemaining = hints;
+    await _prefs.setInt('hintsRemaining', hints);
+    notifyListeners();
+  }
+
+  Future<void> updateHighScore(int score) async {
+    if (score > _highScore) {
+      _highScore = score;
+      await _prefs.setInt('highScore', score);
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateLongestStreak(int streak) async {
+    if (streak > _longestStreak) {
+      _longestStreak = streak;
+      await _prefs.setInt('longestStreak', streak);
+      notifyListeners();
+    }
+  }
+
+  void resetHints() {
+    _hintsRemaining = 3;
+    _prefs.setInt('hintsRemaining', 3);
     notifyListeners();
   }
 }
