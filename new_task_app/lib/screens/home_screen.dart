@@ -3,7 +3,6 @@ import '../database/database_helper.dart';
 import '../models/task.dart';
 import '../providers/task_appearance_provider.dart';
 import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,171 +51,107 @@ class _HomeScreenState extends State<HomeScreen> {
     final descriptionController = TextEditingController();
     bool isRepeatable = false;
 
-    final appearanceProvider = context.read<TaskAppearanceProvider>();
-
-    await showGeneralDialog(
+    await showDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: '',
       barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: Duration(
-        milliseconds:
-            (appearanceProvider.dialogAnimationDuration * 1000).round(),
-      ),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Container();
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          ),
-          child: FadeTransition(
-            opacity: animation,
-            child: StatefulBuilder(
-              builder: (context, setDialogState) {
-                final appearanceProvider =
-                    context.watch<TaskAppearanceProvider>();
-
-                return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                        appearanceProvider.dialogCornerRadius),
-                  ),
-                  elevation: appearanceProvider.dialogElevation,
-                  backgroundColor: appearanceProvider.dialogUseGradient
-                      ? Colors.transparent
-                      : Theme.of(context).scaffoldBackgroundColor.withOpacity(
-                            appearanceProvider.dialogBackgroundOpacity,
+      useSafeArea: true,
+      builder: (context) => AnimatedContainer(
+        duration: Duration(
+          milliseconds:
+              (context.watch<TaskAppearanceProvider>().dialogAnimationDuration *
+                      1000)
+                  .round(),
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) => Consumer<TaskAppearanceProvider>(
+            builder: (context, appearanceProvider, child) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                      appearanceProvider.dialogCornerRadius),
+                ),
+                elevation: appearanceProvider.dialogElevation,
+                backgroundColor: Colors.transparent,
+                child: Container(
+                  decoration: appearanceProvider.dialogUseGradient
+                      ? BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary.withOpacity(
+                                  appearanceProvider.dialogBackgroundOpacity),
+                              Theme.of(context)
+                                  .colorScheme
+                                  .secondary
+                                  .withOpacity(appearanceProvider
+                                      .dialogBackgroundOpacity),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                  content: Container(
-                    decoration: appearanceProvider.dialogUseGradient
-                        ? BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                appearanceProvider.dialogGradientStartColor,
-                                appearanceProvider.dialogGradientEndColor,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                                appearanceProvider.dialogCornerRadius),
-                          )
-                        : null,
-                    padding: const EdgeInsets.all(16),
+                          borderRadius: BorderRadius.circular(
+                              appearanceProvider.dialogCornerRadius),
+                        )
+                      : BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withOpacity(
+                                  appearanceProvider.dialogBackgroundOpacity),
+                          borderRadius: BorderRadius.circular(
+                              appearanceProvider.dialogCornerRadius),
+                        ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Add New Task',
                           style: TextStyle(
-                            fontSize: appearanceProvider.titleFontSize * 1.2,
+                            fontSize: appearanceProvider.titleFontSize,
                             fontWeight: appearanceProvider.titleFontWeight,
-                            color: appearanceProvider.dialogTextColor,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Container(
-                          decoration: BoxDecoration(
-                            color:
-                                appearanceProvider.dialogInputBackgroundColor,
-                            borderRadius: BorderRadius.circular(
-                                appearanceProvider.dialogCornerRadius / 2),
-                            border: Border.all(
-                              color: appearanceProvider.dialogInputBorderColor,
-                            ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: titleController,
+                          style: TextStyle(
+                            fontSize: appearanceProvider.titleFontSize,
+                            fontWeight: appearanceProvider.titleFontWeight,
                           ),
-                          child: TextField(
-                            controller: titleController,
-                            decoration: InputDecoration(
-                              labelText: 'Title',
-                              labelStyle: TextStyle(
-                                color: appearanceProvider.dialogTextColor,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                  width: 2,
-                                ),
-                              ),
+                          decoration: InputDecoration(
+                            labelText: 'Title',
+                            labelStyle: TextStyle(
+                              fontSize: appearanceProvider.descriptionFontSize,
+                              fontWeight:
+                                  appearanceProvider.descriptionFontWeight,
                             ),
-                            style: TextStyle(
-                              fontSize: appearanceProvider.titleFontSize,
-                              fontWeight: appearanceProvider.titleFontWeight,
-                              color: appearanceProvider.dialogTextColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  appearanceProvider.dialogCornerRadius / 2),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            color:
-                                appearanceProvider.dialogInputBackgroundColor,
-                            borderRadius: BorderRadius.circular(
-                                appearanceProvider.dialogCornerRadius / 2),
-                            border: Border.all(
-                              color: appearanceProvider.dialogInputBorderColor,
-                            ),
+                        TextField(
+                          controller: descriptionController,
+                          style: TextStyle(
+                            fontSize: appearanceProvider.descriptionFontSize,
+                            fontWeight:
+                                appearanceProvider.descriptionFontWeight,
                           ),
-                          child: TextField(
-                            controller: descriptionController,
-                            decoration: InputDecoration(
-                              labelText: 'Description',
-                              labelStyle: TextStyle(
-                                color: appearanceProvider.dialogTextColor,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    appearanceProvider.dialogCornerRadius / 2),
-                                borderSide: BorderSide(
-                                  color:
-                                      appearanceProvider.dialogInputBorderColor,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            style: TextStyle(
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            labelStyle: TextStyle(
                               fontSize: appearanceProvider.descriptionFontSize,
                               fontWeight:
                                   appearanceProvider.descriptionFontWeight,
-                              color: appearanceProvider.dialogTextColor,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  appearanceProvider.dialogCornerRadius / 2),
                             ),
                           ),
                         ),
@@ -230,87 +165,79 @@ class _HomeScreenState extends State<HomeScreen> {
                                     appearanceProvider.descriptionFontSize,
                                 fontWeight:
                                     appearanceProvider.descriptionFontWeight,
-                                color: appearanceProvider.dialogTextColor,
                               ),
                             ),
                             const SizedBox(width: 8),
                             Switch(
                               value: isRepeatable,
                               onChanged: (value) {
-                                setDialogState(() {
+                                setState(() {
                                   isRepeatable = value;
                                 });
                               },
                             ),
                           ],
                         ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize:
+                                      appearanceProvider.descriptionFontSize,
+                                  fontWeight:
+                                      appearanceProvider.descriptionFontWeight,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (titleController.text.isNotEmpty) {
+                                  final task = Task(
+                                    title: titleController.text,
+                                    description: descriptionController.text,
+                                    createdAt: DateTime.now(),
+                                    isRepeatable: isRepeatable,
+                                  );
+                                  await DatabaseHelper.instance
+                                      .insertTask(task.toMap());
+                                  Navigator.pop(context);
+                                  _loadTasks();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      appearanceProvider.dialogCornerRadius /
+                                          2),
+                                ),
+                              ),
+                              child: Text(
+                                'Add',
+                                style: TextStyle(
+                                  fontSize:
+                                      appearanceProvider.descriptionFontSize,
+                                  fontWeight:
+                                      appearanceProvider.descriptionFontWeight,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: appearanceProvider.descriptionFontSize,
-                          fontWeight: appearanceProvider.descriptionFontWeight,
-                          color: appearanceProvider.dialogTextColor,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        if (titleController.text.isNotEmpty) {
-                          try {
-                            final task = Task(
-                              title: titleController.text,
-                              description: descriptionController.text,
-                              createdAt: DateTime.now(),
-                              isRepeatable: isRepeatable,
-                              isCompleted: false,
-                            );
-                            await DatabaseHelper.instance
-                                .insertTask(task.toMap());
-                            if (mounted) {
-                              Navigator.pop(context);
-                              _loadTasks();
-                            }
-                          } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error adding task: $e'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter a title'),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(
-                        'Add',
-                        style: TextStyle(
-                          fontSize: appearanceProvider.descriptionFontSize,
-                          fontWeight: appearanceProvider.descriptionFontWeight,
-                          color: appearanceProvider.dialogTextColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

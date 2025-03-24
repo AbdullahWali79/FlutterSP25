@@ -18,13 +18,6 @@ class TaskAppearanceProvider with ChangeNotifier {
   double _dialogElevation = 8.0;
   bool _dialogUseGradient = true;
 
-  // Dialog color settings
-  Color _dialogGradientStartColor = Colors.blue.withOpacity(0.95);
-  Color _dialogGradientEndColor = Colors.purple.withOpacity(0.95);
-  Color _dialogTextColor = Colors.black87;
-  Color _dialogInputBorderColor = Colors.blue;
-  Color _dialogInputBackgroundColor = Colors.white.withOpacity(0.9);
-
   // Getters
   double get titleFontSize => _titleFontSize;
   double get descriptionFontSize => _descriptionFontSize;
@@ -42,13 +35,6 @@ class TaskAppearanceProvider with ChangeNotifier {
   double get dialogBackgroundOpacity => _dialogBackgroundOpacity;
   double get dialogElevation => _dialogElevation;
   bool get dialogUseGradient => _dialogUseGradient;
-
-  // Dialog color getters
-  Color get dialogGradientStartColor => _dialogGradientStartColor;
-  Color get dialogGradientEndColor => _dialogGradientEndColor;
-  Color get dialogTextColor => _dialogTextColor;
-  Color get dialogInputBorderColor => _dialogInputBorderColor;
-  Color get dialogInputBackgroundColor => _dialogInputBackgroundColor;
 
   // Setters
   void updateTitleFontSize(double size) {
@@ -118,28 +104,6 @@ class TaskAppearanceProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Dialog color setters
-  void updateDialogGradientColors(Color startColor, Color endColor) {
-    _dialogGradientStartColor = startColor;
-    _dialogGradientEndColor = endColor;
-    notifyListeners();
-  }
-
-  void updateDialogTextColor(Color color) {
-    _dialogTextColor = color;
-    notifyListeners();
-  }
-
-  void updateDialogInputBorderColor(Color color) {
-    _dialogInputBorderColor = color;
-    notifyListeners();
-  }
-
-  void updateDialogInputBackgroundColor(Color color) {
-    _dialogInputBackgroundColor = color;
-    notifyListeners();
-  }
-
   // Reset to default values
   void resetToDefaults() {
     _titleFontSize = 16.0;
@@ -158,13 +122,6 @@ class TaskAppearanceProvider with ChangeNotifier {
     _dialogBackgroundOpacity = 0.95;
     _dialogElevation = 8.0;
     _dialogUseGradient = true;
-
-    // Reset dialog color settings
-    _dialogGradientStartColor = Colors.blue.withOpacity(0.95);
-    _dialogGradientEndColor = Colors.purple.withOpacity(0.95);
-    _dialogTextColor = Colors.black87;
-    _dialogInputBorderColor = Colors.blue;
-    _dialogInputBackgroundColor = Colors.white.withOpacity(0.9);
 
     notifyListeners();
   }

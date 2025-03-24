@@ -217,48 +217,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        _buildDialogColorPicker(
-          'Dialog Gradient Start Color',
-          appearanceProvider.dialogGradientStartColor,
-          (color) {
-            final colors = [
-              color,
-              appearanceProvider.dialogGradientEndColor,
-            ];
-            appearanceProvider.updateDialogGradientColors(colors[0], colors[1]);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildDialogColorPicker(
-          'Dialog Gradient End Color',
-          appearanceProvider.dialogGradientEndColor,
-          (color) {
-            final colors = [
-              appearanceProvider.dialogGradientStartColor,
-              color,
-            ];
-            appearanceProvider.updateDialogGradientColors(colors[0], colors[1]);
-          },
-        ),
-        const SizedBox(height: 16),
-        _buildDialogColorPicker(
-          'Dialog Text Color',
-          appearanceProvider.dialogTextColor,
-          (color) => appearanceProvider.updateDialogTextColor(color),
-        ),
-        const SizedBox(height: 16),
-        _buildDialogColorPicker(
-          'Dialog Input Border Color',
-          appearanceProvider.dialogInputBorderColor,
-          (color) => appearanceProvider.updateDialogInputBorderColor(color),
-        ),
-        const SizedBox(height: 16),
-        _buildDialogColorPicker(
-          'Dialog Input Background Color',
-          appearanceProvider.dialogInputBackgroundColor,
-          (color) => appearanceProvider.updateDialogInputBackgroundColor(color),
-        ),
       ],
     );
   }
@@ -418,36 +376,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDialogColorPicker(
-    String label,
-    Color color,
-    Function(Color) onColorChanged,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: [
-            _buildColorOption(Colors.blue, onColorChanged),
-            _buildColorOption(Colors.purple, onColorChanged),
-            _buildColorOption(Colors.green, onColorChanged),
-            _buildColorOption(Colors.teal, onColorChanged),
-            _buildColorOption(Colors.orange, onColorChanged),
-            _buildColorOption(Colors.deepOrange, onColorChanged),
-            _buildColorOption(Colors.pink, onColorChanged),
-            _buildColorOption(Colors.red, onColorChanged),
-            _buildColorOption(Colors.indigo, onColorChanged),
-            _buildColorOption(Colors.white, onColorChanged),
-            _buildColorOption(Colors.black87, onColorChanged),
-          ],
-        ),
-      ],
     );
   }
 }
