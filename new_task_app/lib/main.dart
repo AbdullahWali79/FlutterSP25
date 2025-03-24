@@ -4,6 +4,7 @@ import 'screens/main_screen.dart';
 import 'screens/task_detail_screen.dart';
 import 'models/task.dart';
 import 'providers/theme_provider.dart';
+import 'providers/task_appearance_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,8 +15,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => TaskAppearanceProvider()),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(

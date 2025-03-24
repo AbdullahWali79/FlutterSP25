@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/task.dart';
+import '../providers/task_appearance_provider.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,63 +52,265 @@ class _HomeScreenState extends State<HomeScreen> {
     final descriptionController = TextEditingController();
     bool isRepeatable = false;
 
-    await showDialog(
+    final appearanceProvider = context.read<TaskAppearanceProvider>();
+
+    await showGeneralDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Add New Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Text('Repeatable Task'),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: isRepeatable,
-                    onChanged: (value) {
-                      setState(() {
-                        isRepeatable = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (titleController.text.isNotEmpty) {
-                  final task = Task(
-                    title: titleController.text,
-                    description: descriptionController.text,
-                    createdAt: DateTime.now(),
-                    isRepeatable: isRepeatable,
-                  );
-                  await DatabaseHelper.instance.insertTask(task.toMap());
-                  Navigator.pop(context);
-                  _loadTasks();
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        ),
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: Duration(
+        milliseconds:
+            (appearanceProvider.dialogAnimationDuration * 1000).round(),
       ),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Container();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeInOut,
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: StatefulBuilder(
+              builder: (context, setDialogState) {
+                final appearanceProvider =
+                    context.watch<TaskAppearanceProvider>();
+
+                return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        appearanceProvider.dialogCornerRadius),
+                  ),
+                  elevation: appearanceProvider.dialogElevation,
+                  backgroundColor: appearanceProvider.dialogUseGradient
+                      ? Colors.transparent
+                      : Theme.of(context).scaffoldBackgroundColor.withOpacity(
+                            appearanceProvider.dialogBackgroundOpacity,
+                          ),
+                  content: Container(
+                    decoration: appearanceProvider.dialogUseGradient
+                        ? BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                appearanceProvider.dialogGradientStartColor,
+                                appearanceProvider.dialogGradientEndColor,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                                appearanceProvider.dialogCornerRadius),
+                          )
+                        : null,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Add New Task',
+                          style: TextStyle(
+                            fontSize: appearanceProvider.titleFontSize * 1.2,
+                            fontWeight: appearanceProvider.titleFontWeight,
+                            color: appearanceProvider.dialogTextColor,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          decoration: BoxDecoration(
+                            color:
+                                appearanceProvider.dialogInputBackgroundColor,
+                            borderRadius: BorderRadius.circular(
+                                appearanceProvider.dialogCornerRadius / 2),
+                            border: Border.all(
+                              color: appearanceProvider.dialogInputBorderColor,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: titleController,
+                            decoration: InputDecoration(
+                              labelText: 'Title',
+                              labelStyle: TextStyle(
+                                color: appearanceProvider.dialogTextColor,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: appearanceProvider.titleFontSize,
+                              fontWeight: appearanceProvider.titleFontWeight,
+                              color: appearanceProvider.dialogTextColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color:
+                                appearanceProvider.dialogInputBackgroundColor,
+                            borderRadius: BorderRadius.circular(
+                                appearanceProvider.dialogCornerRadius / 2),
+                            border: Border.all(
+                              color: appearanceProvider.dialogInputBorderColor,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: descriptionController,
+                            decoration: InputDecoration(
+                              labelText: 'Description',
+                              labelStyle: TextStyle(
+                                color: appearanceProvider.dialogTextColor,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    appearanceProvider.dialogCornerRadius / 2),
+                                borderSide: BorderSide(
+                                  color:
+                                      appearanceProvider.dialogInputBorderColor,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: appearanceProvider.descriptionFontSize,
+                              fontWeight:
+                                  appearanceProvider.descriptionFontWeight,
+                              color: appearanceProvider.dialogTextColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Text(
+                              'Repeatable Task',
+                              style: TextStyle(
+                                fontSize:
+                                    appearanceProvider.descriptionFontSize,
+                                fontWeight:
+                                    appearanceProvider.descriptionFontWeight,
+                                color: appearanceProvider.dialogTextColor,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Switch(
+                              value: isRepeatable,
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  isRepeatable = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          fontSize: appearanceProvider.descriptionFontSize,
+                          fontWeight: appearanceProvider.descriptionFontWeight,
+                          color: appearanceProvider.dialogTextColor,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (titleController.text.isNotEmpty) {
+                          try {
+                            final task = Task(
+                              title: titleController.text,
+                              description: descriptionController.text,
+                              createdAt: DateTime.now(),
+                              isRepeatable: isRepeatable,
+                              isCompleted: false,
+                            );
+                            await DatabaseHelper.instance
+                                .insertTask(task.toMap());
+                            if (mounted) {
+                              Navigator.pop(context);
+                              _loadTasks();
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error adding task: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a title'),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(
+                        'Add',
+                        style: TextStyle(
+                          fontSize: appearanceProvider.descriptionFontSize,
+                          fontWeight: appearanceProvider.descriptionFontWeight,
+                          color: appearanceProvider.dialogTextColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -153,39 +358,101 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _tasks.length,
         itemBuilder: (context, index) {
           final task = _tasks[index];
-          return ListTile(
-            leading: Checkbox(
-              value: task.isCompleted,
-              onChanged: (value) => _toggleTaskCompletion(task),
-            ),
-            title: Text(
-              task.title,
-              style: TextStyle(
-                decoration:
-                    task.isCompleted ? TextDecoration.lineThrough : null,
+          return Dismissible(
+            key: Key(task.id.toString()),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 16),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+                size: 32,
               ),
             ),
-            subtitle: Row(
-              children: [
-                if (task.description != null)
-                  Expanded(child: Text(task.description!)),
-                if (task.isRepeatable) ...[
-                  const SizedBox(width: 8),
-                  const Icon(Icons.repeat, size: 16),
-                ],
-              ],
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () => _deleteTask(task),
-            ),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/task',
-                arguments: task,
-              );
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) {
+              _deleteTask(task);
             },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    context
+                        .watch<TaskAppearanceProvider>()
+                        .taskGradientStartColor,
+                    context
+                        .watch<TaskAppearanceProvider>()
+                        .taskGradientEndColor,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(
+                  context.watch<TaskAppearanceProvider>().taskCornerRadius,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(
+                      context.watch<TaskAppearanceProvider>().taskShadowOpacity,
+                    ),
+                    spreadRadius: 1,
+                    blurRadius:
+                        context.watch<TaskAppearanceProvider>().taskShadowBlur,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    context.watch<TaskAppearanceProvider>().taskCornerRadius,
+                  ),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                leading: Checkbox(
+                  value: task.isCompleted,
+                  onChanged: (value) => _toggleTaskCompletion(task),
+                ),
+                title: Text(
+                  task.title,
+                  style: TextStyle(
+                    decoration:
+                        task.isCompleted ? TextDecoration.lineThrough : null,
+                    fontWeight:
+                        context.watch<TaskAppearanceProvider>().titleFontWeight,
+                    fontSize:
+                        context.watch<TaskAppearanceProvider>().titleFontSize,
+                  ),
+                ),
+                subtitle: task.description != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          task.description!,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: context
+                                .watch<TaskAppearanceProvider>()
+                                .descriptionFontSize,
+                            fontWeight: context
+                                .watch<TaskAppearanceProvider>()
+                                .descriptionFontWeight,
+                          ),
+                        ),
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/task',
+                    arguments: task,
+                  );
+                },
+              ),
+            ),
           );
         },
       ),
